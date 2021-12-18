@@ -6,6 +6,12 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/en' // lang i18n
 
+import VCharts from 'v-charts-v2'
+
+import iView from 'iview'
+import 'iview/dist/styles/iview.css'
+
+
 import '@/styles/index.scss' // global css
 
 import App from './App'
@@ -32,6 +38,9 @@ if (process.env.NODE_ENV === 'production') {
 Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
+
+Vue.use(VCharts)
+Vue.use(iView)
 
 Vue.config.productionTip = false
 
