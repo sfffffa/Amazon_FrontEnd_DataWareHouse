@@ -6,10 +6,12 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/en' // lang i18n
 
-import VCharts from 'v-charts-v2'
+import * as echarts from 'echarts';
 
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
+
+import axios from 'axios'
 
 
 import '@/styles/index.scss' // global css
@@ -39,8 +41,12 @@ Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
 
-Vue.use(VCharts)
 Vue.use(iView)
+Vue.use(echarts)
+
+Vue.prototype.$echarts = echarts
+axios.defaults.baseURL = 'http://100.67.42.164:9001'
+Vue.prototype.$axios=axios
 
 Vue.config.productionTip = false
 
