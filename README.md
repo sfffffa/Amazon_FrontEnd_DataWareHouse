@@ -4,10 +4,10 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/PanJiaChen/vue-admin-template.git
+git clone https://github.com/sfffffa/Amazon_FrontEnd_DataWareHouse
 
 # 进入项目目录
-cd vue-admin-template
+cd Amazon_FrontEnd_DataWareHouse
 
 # 安装依赖
 npm install
