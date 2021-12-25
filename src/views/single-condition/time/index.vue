@@ -109,24 +109,8 @@ export default {
       formMark:{
         time: 'year',
       },
-      tableData: [{
-            "movie_id": 27,
-            "title": "Will You Still Love Me Tomorrow?",
-            "runtime": 106,
-            "releasedate": "2014-07-08"
-        },
-        {
-            "movie_id": 33,
-            "title": "INXS - Mystify",
-            "runtime": 105,
-            "releasedate": "2014-03-17"
-        },
-        {
-            "movie_id": 36,
-            "title": "Aftermath",
-            "runtime": 104,
-            "releasedate": "2014-10-07"
-        }]
+      tableData: [],
+      supposedToDraw: -1,
     }
   },
   computed:{
@@ -149,8 +133,13 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
         this.$axios
           .get("/getMoviesByYearFromD2", {
             params: {
@@ -159,8 +148,29 @@ export default {
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getMoviesByYearFromHive", {
+            params: {
+              year: this.form.time.year
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            // console.log(this.supposedToDraw);
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
       }
       else if(this.formMark.time=='month'){
         this.$axios
@@ -173,8 +183,13 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
         this.$axios
           .get("/getMoviesByYMFromD2", {
             params: {
@@ -185,8 +200,30 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getMoviesByYMFromHive", {
+            params: {
+              year: this.form.time.year,
+              month: this.form.time.month
+            }
+          })
+          .then((response)=>{
+            this.tableData = response.data.data;
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
       }
       else if(this.formMark.time=='quarter'){
         this.$axios
@@ -199,8 +236,13 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
         this.$axios
           .get("/getMoviesByYQFromD2", {
             params: {
@@ -210,8 +252,29 @@ export default {
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getMoviesByYQFromHive", {
+            params: {
+              year: this.form.time.year,
+              quarter: this.form.time.quarter
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
       }
       
     },
@@ -228,20 +291,64 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(优化后)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
-            type: 'line',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime]
+            type: 'bar',
+            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            itemStyle: {
+							normal: {
+								label: {
+									show: true, //开启显示
+									position: 'top', //在上方显示
+									textStyle: { //数值样式
+										color: 'black',
+										fontSize: 10
+									}
+								}
+							}
+						}
           }
         ]
       };
       //防止越界，重绘canvas
       window.onresize = myChart.resize;
       myChart.setOption(option);//设置option
+    },
+    querySucceed(database) {
+      this.$notify({
+        title: '成功',
+        message: "成功获取"+database+"的查询结果",
+        type: 'success'
+      });
+    },
+    queryFail(database) {
+      this.$notify.error({
+        title: '错误',
+        message: "未能获取"+database+"的查询结果",
+      });
+    },
+  },
+  watch:{
+    database: {
+      handler: function (newd, oldd) {
+        ++this.supposedToDraw;
+      },
+      deep: true,
+      immediate: true,
+    },
+    supposedToDraw: {
+      handler: function(newd,oldd){
+        if(this.supposedToDraw==3){
+          this.draw();
+          this.supposedToDraw=0;
+        }
+      },
+      deep: true,
+      immediate: true,
     }
   },
   mounted(){

@@ -80,11 +80,11 @@
 export default {
   data() {
     return {
-      database:{
+      database: {
         mysqlbTime: 0,
         mysqlaTime: 0,
         hiveTime: 0,
-        neo4jTime: 0,
+        neo4jTime: 0
       },
       form: {
         name:''
@@ -93,7 +93,8 @@ export default {
         actor: 'actor',
       },
       tableData: [],
-      names:[]
+      names:[],
+      supposedToDraw: -1,
     }
   },
   methods: {
@@ -107,8 +108,14 @@ export default {
         .then((response)=>{
           this.tableData = response.data.data;
           this.database.mysqlbTime=response.data.time;
-          this.draw();
+          this.querySucceed("MySQL");
+          // console.log(this.database.mysqlbTime);
+          // this.draw();
         })
+        .catch(error => {
+          ++this.supposedToDraw;
+          this.queryFail("MySQL");
+        });
       this.$axios
         .get("/getMoviesByTitleFromD2", {
           params: {
@@ -117,8 +124,28 @@ export default {
         })
         .then((response)=>{
           this.database.mysqlaTime=response.data.time;
-          this.draw();
+          this.querySucceed("MySQL(反范式)");
+          // this.draw();
         })
+        .catch(error => {
+          ++this.supposedToDraw;
+          this.queryFail("MySQL(反范式)");
+        });
+      this.$axios
+        .get("/getMoviesByTitleFromHive", {
+          params: {
+            title:this.form.name
+          }
+        })
+        .then((response)=>{
+          this.database.hiveTime=response.data.time;
+          this.querySucceed("Hive");
+          // this.draw();
+        })
+        .catch(error => {
+          ++this.supposedToDraw;
+          this.queryFail("Hive");
+        });
     },
     draw(){
       // 初始化echarts实例
@@ -133,20 +160,45 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(优化后)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
-            type: 'line',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime]
+            type: 'bar',
+            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            itemStyle: {
+							normal: {
+								label: {
+									show: true, //开启显示
+									position: 'top', //在上方显示
+									textStyle: { //数值样式
+										color: 'black',
+										fontSize: 10
+									}
+								}
+							}
+						}
           }
-        ]
+        ],
       };
       //防止越界，重绘canvas
       window.onresize = myChart.resize;
       myChart.setOption(option);//设置option
+    },
+    querySucceed(database) {
+      this.$notify({
+        title: '成功',
+        message: "成功获取"+database+"的查询结果",
+        type: 'success'
+      });
+    },
+    queryFail(database) {
+      this.$notify.error({
+        title: '错误',
+        message: "未能获取"+database+"的查询结果",
+      });
     },
     querySearch(queryString, cb) {
       var names = this.names;
@@ -176,10 +228,30 @@ export default {
           })
     },
   },
+  watch:{
+    database: {
+      handler: function (newd, oldd) {
+        ++this.supposedToDraw;
+      },
+      deep: true,
+      immediate: true,
+    },
+    supposedToDraw: {
+      handler: function(newd,oldd){
+        if(this.supposedToDraw==3){
+          this.draw();
+          this.supposedToDraw=0;
+        }
+      },
+      deep: true,
+      immediate: true,
+    }
+  },
   mounted(){
     this.draw();
     this.loadAll();
-  }
+  },
+  
 }
 </script>
 

@@ -36,11 +36,21 @@
           </div></el-col>
         </el-row> 
         <el-row>
+          <el-col :span="7" :push='1'><div class="grid-content bg-purple-dark">
+            <el-radio v-model="radio" label="7">经常一起合作的导演和编剧</el-radio>
+          </div></el-col>
+          <el-col :span="7" :push='1'><div class="grid-content bg-purple-dark">
+            <el-radio v-model="radio" label="8">某一导演与其他编剧的合作关系</el-radio>
+          </div></el-col>
+          <el-col :span="7" :push='1'><div class="grid-content">
+            <el-input v-model="form.director" v-if="radio==8" placeholder="请输入导演名称" />
+          </div></el-col>
+        </el-row>   
+        <el-row>
           <el-col :span="24" :push='22'><div class="grid-content">
             <el-button type="primary" @click="onSubmit">查询</el-button>
           </div></el-col>
         </el-row>
-        
         
         
       </el-form>
@@ -58,7 +68,15 @@
               prop="name1"
               label="演员"
               align='center'
-              width="200">
+              width="200"
+              v-if="radiolabel!=7 && radiolabel!=8">
+            </el-table-column>
+            <el-table-column
+              prop="name1"
+              label="导演"
+              align='center'
+              width="200"
+              v-else>
             </el-table-column>
             <el-table-column
               prop="name2"
@@ -79,10 +97,10 @@
               label="编剧"
               align='center'
               width="200"
-              v-if="radiolabel==3||radiolabel==6">
+              v-if="radiolabel==3||radiolabel==6 || radiolabel==7||radiolabel==8">
             </el-table-column>
             <el-table-column
-              prop="count"
+              prop="cooptimes"
               label="合作次数"
               align='center'
               width="200">
@@ -118,11 +136,13 @@ export default {
         neo4jTime: 0,
       },
       form:{
-        actor:''
+        actor:'',
+        director: ''
       },
       tableData: [],
       radio: '',
-      radiolabel: 1
+      radiolabel: 1,
+      supposedToDraw: -1,
     }
   },
   methods: {
@@ -131,66 +151,145 @@ export default {
         this.$axios
           .get("/getTopCoopAA")
           .then((response)=>{
-            this.tableData = response.data.data;
             this.database.neo4jTime=response.data.time;
-            this.draw();
+            this.querySucceed("neo4j");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
         this.$axios
           .get("/getCoopAATopFromD2")
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getCoopAATopFromD1")
           .then((response)=>{
+            this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopAATopFromHive")
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
         this.radiolabel=1;
       }
       else if(this.radio==2){
         this.$axios
           .get("/getTopCoopAD")
           .then((response)=>{
-            this.tableData = response.data.data;
             this.database.neo4jTime=response.data.time;
-            this.draw();
+            this.querySucceed("neo4j");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
         this.$axios
           .get("/getCoopADTopFromD2")
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getCoopADTopFromD1")
           .then((response)=>{
+            this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopADTopFromHive")
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
         this.radiolabel=2;
       }
       else if(this.radio==3){
         this.$axios
           .get("/getTopCoopAW")
           .then((response)=>{
-            this.tableData = response.data.data;
             this.database.neo4jTime=response.data.time;
-            this.draw();
+            this.querySucceed("neo4j");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
         this.$axios
           .get("/getCoopAWTopFromD2")
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getCoopAWTopFromD1")
           .then((response)=>{
+            this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopAWTopFromHive")
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
+        
         this.radiolabel=3;
       }
       else if(this.radio==4){
@@ -201,30 +300,60 @@ export default {
             }
           })
           .then((response)=>{
-            this.tableData = response.data.data;
             this.database.neo4jTime=response.data.time;
-            this.draw();
+            this.querySucceed("neo4j");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
         this.$axios
           .get("/getCoopAAByActorFromD2",{
             params: {
-              actor:this.form.actor
+              name:this.form.actor
             }
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getCoopAAByActorFromD1",{
             params: {
-              actor:this.form.actor
+              name:this.form.actor
             }
           })
           .then((response)=>{
+            this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopAAByActorFromHive",{
+            params: {
+              name:this.form.actor
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
         this.radiolabel=4;
       }
       else if(this.radio==5){
@@ -235,30 +364,60 @@ export default {
             }
           })
           .then((response)=>{
-            this.tableData = response.data.data;
             this.database.neo4jTime=response.data.time;
-            this.draw();
+            this.querySucceed("neo4j");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
         this.$axios
           .get("/getCoopADByActorFromD2",{
             params: {
-              actor:this.form.actor
+              name:this.form.actor
             }
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getCoopADByActorFromD1",{
             params: {
-              actor:this.form.actor
+              name:this.form.actor
             }
           })
           .then((response)=>{
+            this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopADByActorFromHive",{
+            params: {
+              name:this.form.actor
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
         this.radiolabel=5;
       }
       else if(this.radio==6){
@@ -269,31 +428,173 @@ export default {
             }
           })
           .then((response)=>{
-            this.tableData = response.data.data;
             this.database.neo4jTime=response.data.time;
-            this.draw();
+            this.querySucceed("neo4j");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
         this.$axios
           .get("/getCoopAWByActorFromD2",{
             params: {
-              actor:this.form.actor
+              name:this.form.actor
             }
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getCoopAWByActorFromD1",{
             params: {
-              actor:this.form.actor
+              name:this.form.actor
             }
           })
           .then((response)=>{
+            this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+          this.$axios
+          .get("/getCoopAWByActorFromHive",{
+            params: {
+              name:this.form.actor
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
         this.radiolabel=6;
+      }
+      else if(this.radio==7){
+        this.$axios
+          .get("/getTopCoopDW")
+          .then((response)=>{
+            this.database.neo4jTime=response.data.time;
+            this.querySucceed("neo4j");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
+        this.$axios
+          .get("/getCoopDWTopFromD2")
+          .then((response)=>{
+            this.database.mysqlaTime=response.data.time;
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getCoopDWTopFromD1")
+          .then((response)=>{
+            this.tableData = response.data.data;
+            this.database.mysqlbTime=response.data.time;
+            this.querySucceed("MySQL");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopDWTopFromHive")
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
+        this.radiolabel=7;
+      }
+      else if(this.radio==8){
+        this.$axios
+          .get("/getTopCoopDWByName",{
+            params: {
+              name:this.form.director
+            }
+          })
+          .then((response)=>{
+            this.database.neo4jTime=response.data.time;
+            this.querySucceed("neo4j");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("neo4j");
+          });
+        this.$axios
+          .get("/getCoopDWByDirectorFromD2",{
+            params: {
+              name:this.form.director
+            }
+          })
+          .then((response)=>{
+            this.database.mysqlaTime=response.data.time;
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getCoopDWByDirectorFromD1",{
+            params: {
+              name:this.form.director
+            }
+          })
+          .then((response)=>{
+            this.tableData = response.data.data;
+            this.database.mysqlbTime=response.data.time;
+            this.querySucceed("MySQL");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getCoopDWByDirectorFromHive",{
+            params: {
+              name:this.form.director
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
+        this.radiolabel=8;
       }
     },
     draw(){
@@ -309,20 +610,64 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(优化后)', 'HIVE', 'neo4j']
+          data: ['MySQL', 'MySQL(反范式)', 'HIVE', 'neo4j']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
-            type: 'line',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime, this.database.neo4jTime]
+            type: 'bar',
+            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime, this.database.neo4jTime],
+            itemStyle: {
+							normal: {
+								label: {
+									show: true, //开启显示
+									position: 'top', //在上方显示
+									textStyle: { //数值样式
+										color: 'black',
+										fontSize: 10
+									}
+								}
+							}
+						}
           }
         ]
       };
       //防止越界，重绘canvas
       window.onresize = myChart.resize;
       myChart.setOption(option);//设置option
+    },
+    querySucceed(database) {
+      this.$notify({
+        title: '成功',
+        message: "成功获取"+database+"的查询结果",
+        type: 'success'
+      });
+    },
+    queryFail(database) {
+      this.$notify.error({
+        title: '错误',
+        message: "未能获取"+database+"的查询结果",
+      });
+    },
+  },
+  watch:{
+    database: {
+      handler: function (newd, oldd) {
+        ++this.supposedToDraw;
+      },
+      deep: true,
+      immediate: true,
+    },
+    supposedToDraw: {
+      handler: function(newd,oldd){
+        if(this.supposedToDraw==4){
+          this.draw();
+          this.supposedToDraw=0;
+        }
+      },
+      deep: true,
+      immediate: true,
     }
   },
   mounted(){

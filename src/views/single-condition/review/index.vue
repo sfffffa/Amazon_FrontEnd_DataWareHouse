@@ -2,14 +2,24 @@
   <div class="app-container">
     <el-card style="width:100%; margin:0 auto; padding-top: 20px">
       <el-form ref="form" :model="form" label-width="120px">
-        <el-form-item label="导演">
+        <el-form-item label="电影名">
           <el-row>
             <el-col :span="18"><div class="grid-content">
-              <el-input v-model="form.director" placeholder="请输入导演名"/>
+              <el-autocomplete
+                class="inline-input"
+                v-model="form.name"
+                :fetch-suggestions="querySearch"
+                placeholder="请输入电影名"
+                @select="handleSelect"
+                clearable
+                style="width:100%"
+              ></el-autocomplete>
             </div></el-col>
-            <el-col :span="2" :push="1" ><div class="grid-content">
-              <el-button type="primary" @click="onSubmit">查询</el-button>
-            </div></el-col>
+            <el-col :span="2" :push="1" >
+              <div class="grid-content">
+                <el-button type="primary" @click="onSubmit">查询</el-button>
+              </div>
+            </el-col>
           </el-row>        
         </el-form-item>
       </el-form>
@@ -24,26 +34,32 @@
             :highlight-current-row='true'
             style="width: 95%; margin: 0; height: 330px;">
             <el-table-column
-              prop="movie_id"
-              label="电影ID"
+              prop="reviewerID"
+              label="评论者ID"
               align='center'
               width="90">
             </el-table-column>
             <el-table-column
-              prop="title"
-              label="电影名称"
+              prop="reviewerName"
+              label="评论者姓名"
               align='center'
-              width="300">
+              width="120">
             </el-table-column>
             <el-table-column
-              prop="runtime"
-              label="电影时长"
+              prop="reviewTime"
+              label="评论时间"
               align='center'
-              width="180">
+              width="100">
             </el-table-column>
             <el-table-column
-              prop="releasedate"
-              label="发行日期"
+              prop="score"
+              label="评分"
+              align='center'
+              width="50">
+            </el-table-column>
+            <el-table-column
+              prop="text"
+              label="评论"
               align='center'>
             </el-table-column>
           </el-table>
@@ -70,31 +86,36 @@
 export default {
   data() {
     return {
-      database:{
+      database: {
         mysqlbTime: 0,
         mysqlaTime: 0,
         hiveTime: 0,
-        neo4jTime: 0,
+        neo4jTime: 0
       },
       form: {
-        director:'',
+        name:''
+      },
+      formMark:{
+        actor: 'actor',
       },
       tableData: [],
+      names:[],
       supposedToDraw: -1,
     }
   },
   methods: {
     onSubmit() {
       this.$axios
-        .get("/getMoviesByDirectorFromD1", {
+        .get("/getReviewsByMovieFromD1", {
           params: {
-            name:this.form.director
+            title:this.form.name
           }
         })
         .then((response)=>{
           this.tableData = response.data.data;
           this.database.mysqlbTime=response.data.time;
           this.querySucceed("MySQL");
+          // console.log(this.database.mysqlbTime);
           // this.draw();
         })
         .catch(error => {
@@ -102,9 +123,9 @@ export default {
           this.queryFail("MySQL");
         });
       this.$axios
-        .get("/getMoviesByDirectorFromD2", {
+        .get("/getReviewsByMovieFromD2", {
           params: {
-            name:this.form.director
+            title:this.form.name
           }
         })
         .then((response)=>{
@@ -117,9 +138,9 @@ export default {
           this.queryFail("MySQL(反范式)");
         });
       this.$axios
-        .get("/getMoviesByDirectorFromHive", {
+        .get("/getReviewsByMovieFromHive", {
           params: {
-            name:this.form.director
+            title:this.form.name
           }
         })
         .then((response)=>{
@@ -131,7 +152,6 @@ export default {
           ++this.supposedToDraw;
           this.queryFail("Hive");
         });
-      
     },
     draw(){
       // 初始化echarts实例
@@ -186,6 +206,33 @@ export default {
         message: "未能获取"+database+"的查询结果",
       });
     },
+    querySearch(queryString, cb) {
+      var names = this.names;
+      var results = queryString ? names.filter(this.createFilter(queryString)) : names;
+      // 调用 callback 返回建议列表的数据
+      cb(results);
+    },
+    createFilter(queryString) {
+      return (name) => {
+        return (name.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+      };
+    },
+    loadAll() {
+      this.$axios
+        .get("getMoviesByTitleFromD1",{
+            params: {
+              title:''
+            }
+        })
+        .then((response)=>{
+          this.names=[];
+            for(let i = 0; i < response.data.data.length; ++i){
+              this.names.push({
+                "value":  response.data.data[i].title
+              })
+            }
+          })
+    },
   },
   watch:{
     database: {
@@ -208,7 +255,9 @@ export default {
   },
   mounted(){
     this.draw();
-  }
+    this.loadAll();
+  },
+  
 }
 </script>
 

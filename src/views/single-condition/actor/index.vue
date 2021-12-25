@@ -102,13 +102,8 @@ export default {
       formMark:{
         actor: 'actor',
       },
-      tableData: [{
-        name: 'A电影',
-        }, {
-        name: 'B电影',
-        },{
-        name: 'C电影',
-      },]
+      tableData: [],
+      supposedToDraw: -1,
     }
   },
   computed:{
@@ -131,8 +126,13 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
         this.$axios
           .get("/getMoviesByActorFromD2", {
             params: {
@@ -141,8 +141,28 @@ export default {
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getMoviesByActorFromHive", {
+            params: {
+              name: this.form.actor.actor
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
       }
       else if(this.formMark.actor=='mainActor'){
         this.$axios
@@ -154,8 +174,13 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
         this.$axios
           .get("/getMoviesLeadingByActorFromD2", {
             params: {
@@ -164,8 +189,28 @@ export default {
           })
           .then((response)=>{
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getMoviesLeadingByActorFromHive", {
+            params: {
+              name: this.form.actor.mainActor
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
       }
       
     },
@@ -182,20 +227,64 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(优化后)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
-            type: 'line',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime]
+            type:'bar',
+            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            itemStyle: {
+							normal: {
+								label: {
+									show: true, //开启显示
+									position: 'top', //在上方显示
+									textStyle: { //数值样式
+										color: 'black',
+										fontSize: 10
+									}
+								}
+							}
+						}
           }
         ]
       };
       //防止越界，重绘canvas
       window.onresize = myChart.resize;
       myChart.setOption(option);//设置option
+    },
+    querySucceed(database) {
+      this.$notify({
+        title: '成功',
+        message: "成功获取"+database+"的查询结果",
+        type: 'success'
+      });
+    },
+    queryFail(database) {
+      this.$notify.error({
+        title: '错误',
+        message: "未能获取"+database+"的查询结果",
+      });
+    },
+  },
+  watch:{
+    database: {
+      handler: function (newd, oldd) {
+        ++this.supposedToDraw;
+      },
+      deep: true,
+      immediate: true,
+    },
+    supposedToDraw: {
+      handler: function(newd,oldd){
+        if(this.supposedToDraw==3){
+          this.draw();
+          this.supposedToDraw=0;
+        }
+      },
+      deep: true,
+      immediate: true,
     }
   },
   mounted(){

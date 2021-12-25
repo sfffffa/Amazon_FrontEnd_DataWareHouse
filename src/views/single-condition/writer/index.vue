@@ -2,10 +2,10 @@
   <div class="app-container">
     <el-card style="width:100%; margin:0 auto; padding-top: 20px">
       <el-form ref="form" :model="form" label-width="120px">
-        <el-form-item label="导演">
+        <el-form-item label="编剧">
           <el-row>
             <el-col :span="18"><div class="grid-content">
-              <el-input v-model="form.director" placeholder="请输入导演名"/>
+              <el-input v-model="form.writer" placeholder="请输入编剧名"/>
             </div></el-col>
             <el-col :span="2" :push="1" ><div class="grid-content">
               <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -77,7 +77,7 @@ export default {
         neo4jTime: 0,
       },
       form: {
-        director:'',
+        writer:'',
       },
       tableData: [],
       supposedToDraw: -1,
@@ -86,9 +86,9 @@ export default {
   methods: {
     onSubmit() {
       this.$axios
-        .get("/getMoviesByDirectorFromD1", {
+        .get("/getMoviesByWriterFromD1", {
           params: {
-            name:this.form.director
+            name:this.form.writer
           }
         })
         .then((response)=>{
@@ -102,9 +102,9 @@ export default {
           this.queryFail("MySQL");
         });
       this.$axios
-        .get("/getMoviesByDirectorFromD2", {
+        .get("/getMoviesByWriterFromD2", {
           params: {
-            name:this.form.director
+            name:this.form.writer
           }
         })
         .then((response)=>{
@@ -117,9 +117,9 @@ export default {
           this.queryFail("MySQL(反范式)");
         });
       this.$axios
-        .get("/getMoviesByDirectorFromHive", {
+        .get("/getMoviesByWriterFromHive", {
           params: {
-            name:this.form.director
+            name:this.form.writer
           }
         })
         .then((response)=>{

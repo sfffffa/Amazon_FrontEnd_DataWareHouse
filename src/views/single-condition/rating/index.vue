@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
     <el-card style="width:100%; margin:0 auto; padding-top: 20px">
-      <el-form ref="form" :model="form" label-width="120px" style="margin-top:-1%">
+      <el-form label-width="120px" style="margin-top:-1%">
         <el-row>
-          <el-col :span="24" :push='1'><div class="grid-content bg-purple-dark">
+          <el-col :span="24" :push='1'><div class="grid-content">
             <el-radio v-model="radio" label="1">用户评分 <el-input-number v-model="num" :disabled="radio!=1" size="mini" style="width:90px" :min="1" :max="5" label="描述文字"></el-input-number> 分以上的电影查询</el-radio>
           </div></el-col>
         </el-row>          
@@ -12,6 +12,11 @@
             <el-radio v-model="radio" label="2">用户评价评价数最多的电影</el-radio>
           </div></el-col>
         </el-row>   
+        <el-row>
+          <el-col :span="24" :push='1'><div class="grid-content">
+            <el-radio v-model="radio" label="3">不含负面评价的电影</el-radio>
+          </div></el-col>
+        </el-row> 
         <el-row style="margin-top:-1%">
           <el-col :span="24" :push='22'><div class="grid-content">
             <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -24,18 +29,19 @@
     </el-card>
     <el-card style="width:100%; margin:2% auto; height: 410px;">
       <el-row>
-        <el-col :span="15"><div class="grid-content">
+        <el-col :span="13"><div class="grid-content">
           <el-table
             :data="tableData"
             :stripe="true"
             height="330"
             :highlight-current-row='true'
-            style="width: 95%; margin: 0; height: 330px;">
+            style="width: 95%; margin: 0; height: 330px;"
+            v-if="radiolabel==1 || radiolabel==2">
             <el-table-column
               prop="movie_id"
               label="电影ID"
               align='center'
-              width="180">
+              width="140">
             </el-table-column>
             <el-table-column
               prop="title"
@@ -56,6 +62,37 @@
               v-if="radiolabel==2">
             </el-table-column>
           </el-table>
+          <el-table
+            :data="tableData"
+            :stripe="true"
+            height="330"
+            :highlight-current-row='true'
+            style="width: 95%; margin: 0; height: 330px;"
+            v-if="radiolabel==3">
+            <el-table-column
+              prop="movie_id"
+              label="电影ID"
+              align='center'
+              width="90">
+            </el-table-column>
+            <el-table-column
+              prop="title"
+              label="电影名称"
+              align='center'
+              width="300">
+            </el-table-column>
+            <el-table-column
+              prop="runtime"
+              label="电影时长"
+              align='center'
+              width="90">
+            </el-table-column>
+            <el-table-column
+              prop="releasedate"
+              label="发行日期"
+              align='center'>
+            </el-table-column>
+          </el-table>
           <el-pagination
             layout="total"
             style="margin: 0 auto;"
@@ -67,7 +104,7 @@
           <el-divider direction="vertical" ></el-divider>
         </div></el-col>
 
-        <el-col :span="8"><div class="grid-content">
+        <el-col :span="10"><div class="grid-content">
           <div id="myChart" :style="{width: '100%', height: '400px'}"></div>
         </div></el-col>
       </el-row>
@@ -85,20 +122,16 @@ export default {
         hiveTime: 0,
         neo4jTime: 0,
       },
-      tableData: [{
-        name: 'A电影',
-        }, {
-        name: 'B电影',
-        },{
-        name: 'C电影',
-      },],
+      tableData: [],
       radio: '',
       radiolabel: 1,
       num: "",
+      supposedToDraw: -1,
     }
   },
   methods: {
     onSubmit() {
+      this.tableData = [];
       if(this.radio==1){
         this.$axios
           .get("/getMoviesByScoreFromD2", {
@@ -109,8 +142,11 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlaTime=response.data.time;
-            this.draw()
+            this.querySucceed("MySQL(反范式)");
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+          });
         this.$axios
           .get("/getMoviesByScoreFromD1", {
             params: {
@@ -119,8 +155,26 @@ export default {
           })
           .then((response)=>{
             this.database.mysqlbTime=response.data.time;
-            this.draw()
+            this.querySucceed("MySQL");
+            // this.draw()
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+          });
+        this.$axios
+          .get("/getMoviesByScoreFromHive", {
+            params: {
+              score: this.num
+            }
+          })
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw()
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+          });
         this.radiolabel=1;
       }
       else if(this.radio==2){
@@ -129,15 +183,73 @@ export default {
           .then((response)=>{
             this.tableData = response.data.data;
             this.database.mysqlaTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
         this.$axios
           .get("/getMoviesByReviewNumFromD1")
           .then((response)=>{
             this.database.mysqlbTime=response.data.time;
-            this.draw();
+            this.querySucceed("MySQL");
+            // this.draw();
           })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getMoviesByReviewNumFromHive")
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
         this.radiolabel=2;
+      }
+      else if(this.radio==3){
+        this.$axios
+          .get("/getMoviesWithoutNegReviewFromD2")
+          .then((response)=>{
+            this.tableData = response.data.data;
+            this.database.mysqlaTime=response.data.time;
+            this.querySucceed("MySQL(反范式)");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL(反范式)");
+          });
+        this.$axios
+          .get("/getMoviesWithoutNegReviewFromD1")
+          .then((response)=>{
+            this.database.mysqlbTime=response.data.time;
+            this.querySucceed("MySQL");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("MySQL");
+          });
+        this.$axios
+          .get("/getMoviesWithoutNegReviewFromHive")
+          .then((response)=>{
+            this.database.hiveTime=response.data.time;
+            this.querySucceed("Hive");
+            // this.draw();
+          })
+          .catch(error => {
+            ++this.supposedToDraw;
+            this.queryFail("Hive");
+          });
+        this.radiolabel=3;
       }
     },
     draw(){
@@ -153,7 +265,7 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(优化后)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
         },
         yAxis: {},
         series: [
@@ -167,6 +279,38 @@ export default {
       //防止越界，重绘canvas
       window.onresize = myChart.resize;
       myChart.setOption(option);//设置option
+    },
+    querySucceed(database) {
+      this.$notify({
+        title: '成功',
+        message: "成功获取"+database+"的查询结果",
+        type: 'success'
+      });
+    },
+    queryFail(database) {
+      this.$notify.error({
+        title: '错误',
+        message: "未能获取"+database+"的查询结果",
+      });
+    },
+  },
+  watch:{
+    database: {
+      handler: function (newd, oldd) {
+        ++this.supposedToDraw;
+      },
+      deep: true,
+      immediate: true,
+    },
+    supposedToDraw: {
+      handler: function(newd,oldd){
+        if(this.supposedToDraw==3){
+          this.draw();
+          this.supposedToDraw=0;
+        }
+      },
+      deep: true,
+      immediate: true,
     }
   },
   mounted(){

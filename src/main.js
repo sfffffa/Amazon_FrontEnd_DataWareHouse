@@ -45,7 +45,7 @@ Vue.use(iView)
 Vue.use(echarts)
 
 Vue.prototype.$echarts = echarts
-axios.defaults.baseURL = 'http://100.67.42.164:9001'
+axios.defaults.baseURL = 'http://100.73.107.54:9001'
 Vue.prototype.$axios=axios
 
 Vue.config.productionTip = false
