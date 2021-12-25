@@ -271,8 +271,20 @@ export default {
         series: [
           {
             name: '查询时间',
-            type: 'line',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime]
+            type: 'bar',
+            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            itemStyle: {
+							normal: {
+								label: {
+									show: true, //开启显示
+									position: 'top', //在上方显示
+									textStyle: { //数值样式
+										color: 'black',
+										fontSize: 10
+									}
+								}
+							}
+						}
           }
         ]
       };
