@@ -9,7 +9,7 @@
         </el-row>          
         <el-row>
           <el-col :span="24" :push='1'><div class="grid-content">
-            <el-radio v-model="radio" label="2">用户评价评价数最多的电影</el-radio>
+            <el-radio v-model="radio" label="2">用户评价数最多的电影</el-radio>
           </div></el-col>
         </el-row>   
         <el-row>
@@ -85,7 +85,8 @@
               prop="runtime"
               label="电影时长"
               align='center'
-              width="90">
+              width="90"
+              :formatter="runtimeFormatter">
             </el-table-column>
             <el-table-column
               prop="releasedate"
@@ -161,20 +162,20 @@ export default {
           .catch(error => {
             ++this.supposedToDraw;
           });
-        this.$axios
-          .get("/getMoviesByScoreFromHive", {
-            params: {
-              score: this.num
-            }
-          })
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw()
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-          });
+        // this.$axios
+        //   .get("/getMoviesByScoreFromHive", {
+        //     params: {
+        //       score: this.num
+        //     }
+        //   })
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw()
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //   });
         this.radiolabel=1;
       }
       else if(this.radio==2){
@@ -201,17 +202,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getMoviesByReviewNumFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getMoviesByReviewNumFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=2;
       }
       else if(this.radio==3){
@@ -238,17 +239,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getMoviesWithoutNegReviewFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getMoviesWithoutNegReviewFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=3;
       }
     },
@@ -265,14 +266,14 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
             type: 'bar',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            data: [this.database.mysqlbTime, this.database.mysqlaTime],
             itemStyle: {
 							normal: {
 								label: {
@@ -305,6 +306,13 @@ export default {
         message: "未能获取"+database+"的查询结果",
       });
     },
+    runtimeFormatter(row,column){
+      let runtime = row.runtime;
+      if(runtime==0){
+        return '-'
+      }
+      return runtime;
+    },
   },
   watch:{
     database: {
@@ -316,7 +324,7 @@ export default {
     },
     supposedToDraw: {
       handler: function(newd,oldd){
-        if(this.supposedToDraw==3){
+        if(this.supposedToDraw==2){
           this.draw();
           this.supposedToDraw=0;
         }

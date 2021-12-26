@@ -56,7 +56,8 @@
               prop="runtime"
               label="电影时长"
               align='center'
-              width="180">
+              width="180"
+              :formatter="runtimeFormatter">
             </el-table-column>
             <el-table-column
               prop="releasedate"
@@ -266,6 +267,13 @@ export default {
         title: '错误',
         message: "未能获取"+database+"的查询结果",
       });
+    },
+    runtimeFormatter(row,column){
+      let runtime = row.runtime;
+      if(runtime==0){
+        return '-'
+      }
+      return runtime;
     },
   },
   watch:{

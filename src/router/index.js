@@ -117,6 +117,12 @@ export const constantRoutes = [
         component: () => import('@/views/single-condition/review/index'),
         meta: { title: '按照电影名称进行评论的查询及统计', icon: 'table' }
       },
+      {
+        path: 'version',
+        name: 'Version',
+        component: () => import('@/views/single-condition/version/index'),
+        meta: { title: '查询电影版本', icon: 'table' }
+      },
     ]
   },
 

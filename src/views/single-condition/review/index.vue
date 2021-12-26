@@ -10,7 +10,6 @@
                 v-model="form.name"
                 :fetch-suggestions="querySearch"
                 placeholder="请输入电影名"
-                @select="handleSelect"
                 clearable
                 style="width:100%"
               ></el-autocomplete>
@@ -137,21 +136,21 @@ export default {
           ++this.supposedToDraw;
           this.queryFail("MySQL(反范式)");
         });
-      this.$axios
-        .get("/getReviewsByMovieFromHive", {
-          params: {
-            title:this.form.name
-          }
-        })
-        .then((response)=>{
-          this.database.hiveTime=response.data.time;
-          this.querySucceed("Hive");
-          // this.draw();
-        })
-        .catch(error => {
-          ++this.supposedToDraw;
-          this.queryFail("Hive");
-        });
+      // this.$axios
+      //   .get("/getReviewsByMovieFromHive", {
+      //     params: {
+      //       title:this.form.name
+      //     }
+      //   })
+      //   .then((response)=>{
+      //     this.database.hiveTime=response.data.time;
+      //     this.querySucceed("Hive");
+      //     // this.draw();
+      //   })
+      //   .catch(error => {
+      //     ++this.supposedToDraw;
+      //     this.queryFail("Hive");
+      //   });
     },
     draw(){
       // 初始化echarts实例
@@ -166,14 +165,14 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
             type: 'bar',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            data: [this.database.mysqlbTime, this.database.mysqlaTime],
             itemStyle: {
 							normal: {
 								label: {
@@ -244,7 +243,7 @@ export default {
     },
     supposedToDraw: {
       handler: function(newd,oldd){
-        if(this.supposedToDraw==3){
+        if(this.supposedToDraw==2){
           this.draw();
           this.supposedToDraw=0;
         }

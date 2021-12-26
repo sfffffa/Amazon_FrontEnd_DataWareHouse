@@ -2,14 +2,23 @@
   <div class="app-container">
     <el-card style="width:100%; margin:0 auto; padding-top: 20px">
       <el-form ref="form" :model="form" label-width="120px">
-        <el-form-item label="编剧">
+        <el-form-item label="电影名">
           <el-row>
             <el-col :span="18"><div class="grid-content">
-              <el-input v-model="form.writer" placeholder="请输入编剧名"/>
+              <el-autocomplete
+                class="inline-input"
+                v-model="form.name"
+                :fetch-suggestions="querySearch"
+                placeholder="请输入电影名"
+                clearable
+                style="width:100%"
+              ></el-autocomplete>
             </div></el-col>
-            <el-col :span="2" :push="1" ><div class="grid-content">
-              <el-button type="primary" @click="onSubmit">查询</el-button>
-            </div></el-col>
+            <el-col :span="2" :push="1" >
+              <div class="grid-content">
+                <el-button type="primary" @click="onSubmit">查询</el-button>
+              </div>
+            </el-col>
           </el-row>        
         </el-form-item>
       </el-form>
@@ -33,19 +42,32 @@
               prop="title"
               label="电影名称"
               align='center'
-              width="300">
+              width="210">
+            </el-table-column>
+            <el-table-column
+              prop="releasedate"
+              label="发行日期"
+              align='center'
+              width="180">
             </el-table-column>
             <el-table-column
               prop="runtime"
               label="电影时长"
               align='center'
-              width="180"
+              width="90"
               :formatter="runtimeFormatter">
             </el-table-column>
             <el-table-column
-              prop="releasedate"
-              label="发行日期"
+              label="版本"
               align='center'>
+              <template slot-scope="scope">
+                <li v-for="item in scope.row.asin.split(',')" :key="item">
+                  <el-link type="primary" 
+                  :href="'http://www.amazon.com/dp/'+item"
+                  target="_blank"
+                  class="buttonText">{{item}}</el-link>
+                </li>                               
+              </template>
             </el-table-column>
           </el-table>
           <el-pagination
@@ -71,31 +93,36 @@
 export default {
   data() {
     return {
-      database:{
+      database: {
         mysqlbTime: 0,
         mysqlaTime: 0,
         hiveTime: 0,
-        neo4jTime: 0,
+        neo4jTime: 0
       },
       form: {
-        writer:'',
+        name:''
+      },
+      formMark:{
+        actor: 'actor',
       },
       tableData: [],
+      names:[],
       supposedToDraw: -1,
     }
   },
   methods: {
     onSubmit() {
       this.$axios
-        .get("/getMoviesByWriterFromD1", {
+        .get("/getVersionByMovieFromD1", {
           params: {
-            name:this.form.writer
+            title:this.form.name
           }
         })
         .then((response)=>{
           this.tableData = response.data.data;
           this.database.mysqlbTime=response.data.time;
           this.querySucceed("MySQL");
+          // console.log(this.database.mysqlbTime);
           // this.draw();
         })
         .catch(error => {
@@ -103,9 +130,9 @@ export default {
           this.queryFail("MySQL");
         });
       this.$axios
-        .get("/getMoviesByWriterFromD2", {
+        .get("/getVersionByMovieFromD2", {
           params: {
-            name:this.form.writer
+            title:this.form.name
           }
         })
         .then((response)=>{
@@ -117,22 +144,21 @@ export default {
           ++this.supposedToDraw;
           this.queryFail("MySQL(反范式)");
         });
-      this.$axios
-        .get("/getMoviesByWriterFromHive", {
-          params: {
-            name:this.form.writer
-          }
-        })
-        .then((response)=>{
-          this.database.hiveTime=response.data.time;
-          this.querySucceed("Hive");
-          // this.draw();
-        })
-        .catch(error => {
-          ++this.supposedToDraw;
-          this.queryFail("Hive");
-        });
-      
+      // this.$axios
+      //   .get("/getMoviesByTitleFromHive", {
+      //     params: {
+      //       title:this.form.name
+      //     }
+      //   })
+      //   .then((response)=>{
+      //     this.database.hiveTime=response.data.time;
+      //     this.querySucceed("Hive");
+      //     // this.draw();
+      //   })
+      //   .catch(error => {
+      //     ++this.supposedToDraw;
+      //     this.queryFail("Hive");
+      //   });
     },
     draw(){
       // 初始化echarts实例
@@ -147,14 +173,14 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
             type: 'bar',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            data: [this.database.mysqlbTime, this.database.mysqlaTime],
             itemStyle: {
 							normal: {
 								label: {
@@ -168,7 +194,7 @@ export default {
 							}
 						}
           }
-        ]
+        ],
       };
       //防止越界，重绘canvas
       window.onresize = myChart.resize;
@@ -187,6 +213,33 @@ export default {
         message: "未能获取"+database+"的查询结果",
       });
     },
+    querySearch(queryString, cb) {
+      var names = this.names;
+      var results = queryString ? names.filter(this.createFilter(queryString)) : names;
+      // 调用 callback 返回建议列表的数据
+      cb(results);
+    },
+    createFilter(queryString) {
+      return (name) => {
+        return (name.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+      };
+    },
+    loadAll() {
+      this.$axios
+        .get("getMoviesByTitleFromD1",{
+            params: {
+              title:''
+            }
+        })
+        .then((response)=>{
+          this.names=[];
+            for(let i = 0; i < response.data.data.length; ++i){
+              this.names.push({
+                "value":  response.data.data[i].title
+              })
+            }
+          })
+    },    
     runtimeFormatter(row,column){
       let runtime = row.runtime;
       if(runtime==0){
@@ -205,7 +258,7 @@ export default {
     },
     supposedToDraw: {
       handler: function(newd,oldd){
-        if(this.supposedToDraw==3){
+        if(this.supposedToDraw==2){
           this.draw();
           this.supposedToDraw=0;
         }
@@ -216,7 +269,9 @@ export default {
   },
   mounted(){
     this.draw();
-  }
+    this.loadAll();
+  },
+  
 }
 </script>
 

@@ -59,7 +59,8 @@
               prop="runtime"
               label="电影时长"
               align='center'
-              width="90">
+              width="90"
+              :formatter="runtimeFormatter">
             </el-table-column>
             <el-table-column
               prop="releasedate"
@@ -160,20 +161,20 @@ export default {
           .catch(error => {
             ++this.supposedToDraw;
           });
-        this.$axios
-          .get("/getMoviesByGenresFromHive", {
-            params: {
-              genres: this.form.genre
-            }
-          })
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw()
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-          });
+        // this.$axios
+        //   .get("/getMoviesByGenresFromHive", {
+        //     params: {
+        //       genres: this.form.genre
+        //     }
+        //   })
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw()
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //   });
         this.radiolabel=1;
       }
       else if(this.radio==2){
@@ -200,17 +201,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getGenresRankingFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getGenresRankingFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=2;
       }
     },
@@ -227,14 +228,14 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(反范式)', 'HIVE']
+          data: ['MySQL', 'MySQL(反范式)']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
             type: 'bar',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime],
+            data: [this.database.mysqlbTime, this.database.mysqlaTime],
             itemStyle: {
 							normal: {
 								label: {
@@ -290,6 +291,13 @@ export default {
             }
           })
     },
+    runtimeFormatter(row,column){
+      let runtime = row.runtime;
+      if(runtime==0){
+        return '-'
+      }
+      return runtime;
+    },
   },
   watch:{
     database: {
@@ -301,7 +309,7 @@ export default {
     },
     supposedToDraw: {
       handler: function(newd,oldd){
-        if(this.supposedToDraw==3){
+        if(this.supposedToDraw==2){
           this.draw();
           this.supposedToDraw=0;
         }

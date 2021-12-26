@@ -182,17 +182,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopAATopFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopAATopFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=1;
       }
       else if(this.radio==2){
@@ -230,17 +230,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopADTopFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopADTopFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=2;
       }
       else if(this.radio==3){
@@ -278,17 +278,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopAWTopFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopAWTopFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         
         this.radiolabel=3;
       }
@@ -339,21 +339,21 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopAAByActorFromHive",{
-            params: {
-              name:this.form.actor
-            }
-          })
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopAAByActorFromHive",{
+        //     params: {
+        //       name:this.form.actor
+        //     }
+        //   })
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=4;
       }
       else if(this.radio==5){
@@ -403,21 +403,21 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopADByActorFromHive",{
-            params: {
-              name:this.form.actor
-            }
-          })
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopADByActorFromHive",{
+        //     params: {
+        //       name:this.form.actor
+        //     }
+        //   })
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=5;
       }
       else if(this.radio==6){
@@ -467,21 +467,21 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-          this.$axios
-          .get("/getCoopAWByActorFromHive",{
-            params: {
-              name:this.form.actor
-            }
-          })
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+          // this.$axios
+          // .get("/getCoopAWByActorFromHive",{
+          //   params: {
+          //     name:this.form.actor
+          //   }
+          // })
+          // .then((response)=>{
+          //   this.database.hiveTime=response.data.time;
+          //   this.querySucceed("Hive");
+          //   // this.draw();
+          // })
+          // .catch(error => {
+          //   ++this.supposedToDraw;
+          //   this.queryFail("Hive");
+          // });
         this.radiolabel=6;
       }
       else if(this.radio==7){
@@ -519,17 +519,17 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopDWTopFromHive")
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopDWTopFromHive")
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=7;
       }
       else if(this.radio==8){
@@ -579,21 +579,21 @@ export default {
             ++this.supposedToDraw;
             this.queryFail("MySQL");
           });
-        this.$axios
-          .get("/getCoopDWByDirectorFromHive",{
-            params: {
-              name:this.form.director
-            }
-          })
-          .then((response)=>{
-            this.database.hiveTime=response.data.time;
-            this.querySucceed("Hive");
-            // this.draw();
-          })
-          .catch(error => {
-            ++this.supposedToDraw;
-            this.queryFail("Hive");
-          });
+        // this.$axios
+        //   .get("/getCoopDWByDirectorFromHive",{
+        //     params: {
+        //       name:this.form.director
+        //     }
+        //   })
+        //   .then((response)=>{
+        //     this.database.hiveTime=response.data.time;
+        //     this.querySucceed("Hive");
+        //     // this.draw();
+        //   })
+        //   .catch(error => {
+        //     ++this.supposedToDraw;
+        //     this.queryFail("Hive");
+        //   });
         this.radiolabel=8;
       }
     },
@@ -610,14 +610,14 @@ export default {
           data: ['查询时间']
         },
         xAxis: {
-          data: ['MySQL', 'MySQL(反范式)', 'HIVE', 'neo4j']
+          data: ['MySQL', 'MySQL(反范式)', 'neo4j']
         },
         yAxis: {},
         series: [
           {
             name: '查询时间',
             type: 'bar',
-            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.hiveTime, this.database.neo4jTime],
+            data: [this.database.mysqlbTime, this.database.mysqlaTime, this.database.neo4jTime],
             itemStyle: {
 							normal: {
 								label: {
@@ -661,7 +661,7 @@ export default {
     },
     supposedToDraw: {
       handler: function(newd,oldd){
-        if(this.supposedToDraw==4){
+        if(this.supposedToDraw==3){
           this.draw();
           this.supposedToDraw=0;
         }

@@ -10,7 +10,6 @@
                 v-model="form.name"
                 :fetch-suggestions="querySearch"
                 placeholder="请输入电影名"
-                @select="handleSelect"
                 clearable
                 style="width:100%"
               ></el-autocomplete>
@@ -49,7 +48,8 @@
               prop="runtime"
               label="电影时长"
               align='center'
-              width="180">
+              width="180"
+              :formatter="runtimeFormatter">
             </el-table-column>
             <el-table-column
               prop="releasedate"
@@ -226,6 +226,13 @@ export default {
               })
             }
           })
+    },
+    runtimeFormatter(row,column){
+      let runtime = row.runtime;
+      if(runtime==0){
+        return '-'
+      }
+      return runtime;
     },
   },
   watch:{
