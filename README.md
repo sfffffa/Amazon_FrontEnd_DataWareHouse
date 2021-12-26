@@ -4,7 +4,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/sfffffa/Amazon_FrontEnd_DataWareHouse
+git clone https://github.com/sfffffa/Amazon_FrontEnd_DataWareHouse.git
 
 # 进入项目目录
 cd Amazon_FrontEnd_DataWareHouse
@@ -45,4 +45,12 @@ npm run lint
 
 # 代码格式检查并自动修复
 npm run lint -- --fix
+```
+
+## 本项目对应后端地址
+
+```bash
+# 克隆项目
+git clone https://github.com/Shishouge/DataWare-House.git
+
 ```
